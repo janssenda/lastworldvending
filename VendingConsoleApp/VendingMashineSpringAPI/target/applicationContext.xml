@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/mvc
+          http://www.springframework.org/schema/mvc/spring-mvc.xsd
+          http://www.springframework.org/schema/tx
+          http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+          http://www.springframework.org/schema/context
+          http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/aop  
+          http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+    <aop:aspectj-autoproxy />
+    
+    <bean id="userIo" class="com.danimaetrix.library.userIO.UserIoConsoleImpl" />
+
+    
+    <bean id="asciiView" class="com.dm.vendingmashine.ui.AsciiViewImpl" >
+        <constructor-arg ref="userIo" />         
+    </bean>
+    <bean id="textView" class="com.dm.vendingmashine.ui.TextViewImpl" >
+        <constructor-arg ref="userIo" />         
+    </bean>
+     
+    <bean id="inventoryDao" class="com.dm.vendingmashine.dao.InventoryDaoImpl" />
+    <bean id="pricingDao" class="com.dm.vendingmashine.dao.PricingDaoImpl" />    
+    <bean id="auditDao" class="com.dm.vendingmashine.dao.AuditDaoImpl" />    
+
+    <bean id="vendingService" class="com.dm.vendingmashine.servicelayer.VendingServiceImpl">
+        <constructor-arg ref="inventoryDao"/>
+        <constructor-arg ref="pricingDao"/>  
+    </bean>  
+
+    
+    <bean id="logicIdeal" class="com.dm.vendingmashine.logic.RealLogicIdealImpl" >    
+        <constructor-arg ref="vendingService" />
+    </bean>
+    <bean id="logicRealistic" class="com.dm.vendingmashine.logic.RealLogicRealisticImpl" >    
+        <constructor-arg ref="vendingService" />
+    </bean>    
+
+
+    <bean id="controller" class="com.dm.vendingmashine.controller.Controller" >    
+        <constructor-arg ref="textView" />
+        <constructor-arg ref="logicRealistic" />
+    </bean>
+    
+    <bean id="loggingAspect" class="com.dm.vendingmashine.advice.LoggingAspect">
+        <constructor-arg ref="auditDao"/>
+    </bean>
+     
+    <bean id="loggingAdvice" class="com.dm.vendingmashine.advice.LoggingAdvice">
+        <constructor-arg ref="auditDao"/>
+    </bean>
+    <!--
+    <aop:config>
+        <aop:aspect ref="loggingAdvice">
+            <aop:after-throwing
+                throwing="ex"
+                method="writeAuditEntry"
+                pointcut="execution(* com.dm.vendingmashine.servicelayer.VendingService.vendProduct(..))"
+            />                    
+        </aop:aspect>
+    </aop:config>
+    !-->
+     
+     
+     
+             
+</beans>
+
+
+
